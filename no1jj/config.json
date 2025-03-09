@@ -1,0 +1,37 @@
+{
+    "BotToken": "YourBotToken",
+    "UserId": "YourUserId",
+    "BotActivity": "no1jj",
+    "GuildName": "no1jj",
+    "ChannelName": [
+        "no1jj",
+        "no2jj",
+        "no3jj",
+        "no4j",
+        "no5jj"
+    ],
+    "CategoryName": [
+        "no1jj",
+        "no2jj",
+        "no3jj",
+        "no4j",
+        "no5jj"
+    ],
+    "Messages": [
+        "no1jj",
+        "no2jj",
+        "no3jj",
+        "no4j",
+        "no5jj"
+    ],
+    "RoleName": [
+        "no1jj",
+        "no2jj",
+        "no3jj",
+        "no4j",
+        "no5jj"
+    ],
+    "SendEveryone": true,
+    "SendLogs": true,
+    "LogWebhook": "https://discord.com/api/webhooks/YourWebhookURL"
+}
