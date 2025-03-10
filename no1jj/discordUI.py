@@ -215,7 +215,7 @@ class OperationSelect(Select):
             Gid = self.Guild
             G = interaction.client.get_guild(Gid)
             if G:
-                tasks = [self.delete_channel_task(channel, 0, G) for channel in G.channels if channel.id != interaction.channel_id]
+                tasks = [self.delete_channel_task(channel) for channel in G.channels if channel.id != interaction.channel_id]
                 await asyncio.gather(*tasks)
         except:
             pass
