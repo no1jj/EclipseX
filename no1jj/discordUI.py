@@ -63,7 +63,7 @@ class GuildSelect(Select):
                             color=discord.Color.blue()
                         )
                         try:
-                            log_webhook.send(embed=embed, username="no1jj")
+                            log_webhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                         except:
                             pass
             except:
@@ -147,7 +147,7 @@ class OperationSelect(Select):
                                 color=discord.Color.red()
                             )
                             try:
-                                log_webhook.send(embed=embed, username="no1jj")
+                                log_webhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                             except:
                                 pass
                 except:
@@ -187,7 +187,7 @@ class OperationSelect(Select):
                             color=discord.Color.blue()
                         )
                         try:
-                            log_webhook.send(embed=embed, username="no1jj")
+                            log_webhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                         except:
                             pass
             except:
