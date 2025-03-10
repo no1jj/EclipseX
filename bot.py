@@ -49,4 +49,4 @@ async def start(interaction: Interaction):
 no1jj.run(BotToken)
 
 # Made by no.1_jj
-# v1.0.0
+# v1.0.1
