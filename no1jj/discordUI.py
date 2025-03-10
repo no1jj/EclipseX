@@ -121,7 +121,7 @@ class OperationSelect(Select):
         operation = self.values[0]
         SendLogs = helper.LoadConfig().get("SendLogs", False)
         LogWebhook = helper.LoadConfig().get("LogWebhook", "")
-        
+
         stop_button = Button(style=discord.ButtonStyle.danger, label="Stop", custom_id="stop")
         
         async def stop_callback(interaction):
@@ -193,129 +193,146 @@ class OperationSelect(Select):
             except:
                 pass
 
-        if operation == "DCCT":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    tasks = [self.delete_channel(channel) for channel in G.channels if channel.id != interaction.channel_id]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
+        self.operations = {
+            "DCCT": self.delete_channel_and_category,
+            "SendMessage": self.send_message,
+            "DR": self.delete_role,
+            "DE": self.delete_emoji,
+            "DS": self.delete_sticker,
+            "MB": self.ban_member,
+            "MK": self.kick_member,
+            "CCT": self.create_category,
+            "CC": self.create_channel,
+            "CR": self.create_role,
+            "CIN": self.change_icon_and_name
+        }
 
-        if operation == "SendMessage":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    config = helper.LoadConfig()
-                    messages = config.get("Messages", [])
-                    if messages:
-                        tasks = [self.send_message_to_channel(channel, messages) for channel in G.text_channels]
-                        await asyncio.gather(*tasks)
-            except:
-                pass
+        if operation in self.operations:
+            await self.operations[operation](interaction)
 
-        if operation == "DR":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    tasks = [self.delete_role(role) for role in G.roles if role.name != "@everyone"]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
+    async def delete_channel_and_category(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                tasks = [self.delete_channel_task(channel, 0, G) for channel in G.channels if channel.id != interaction.channel_id]
+                await asyncio.gather(*tasks)
+        except:
+            pass
 
-        if operation == "DE":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    tasks = [self.delete_emoji(emoji) for emoji in G.emojis]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
-
-        if operation == "DS":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    tasks = [self.delete_sticker(sticker) for sticker in G.stickers]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
-
-        if operation == "MB":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    tasks = [self.ban_member(member) for member in G.members]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
-
-        if operation == "MK":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    tasks = [self.kick_member(member) for member in G.members]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
-
-        if operation == "CCT":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
+    async def send_message(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
                 config = helper.LoadConfig()
-                names = config.get("CategoryName", [])
-                if G:
-                    tasks = [self.create_category(names, G)]
+                messages = config.get("Messages", [])
+                if messages:
+                    tasks = [self.send_message_to_channel_task(channel, messages) for channel in G.text_channels]
                     await asyncio.gather(*tasks)
-            except:
-                pass
+        except:
+            pass
 
-        if operation == "CC":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    config = helper.LoadConfig()
-                    names = config.get("ChannelName", [])
-                    tasks = [self.create_channel(names, G)]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
+    async def delete_role(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                tasks = [self.delete_role_task(role) for role in G.roles if role.name != "@everyone"]
+                await asyncio.gather(*tasks)
+        except:
+            pass
 
-        if operation == "CR":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
+    async def delete_emoji(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                tasks = [self.delete_emoji_task(emoji) for emoji in G.emojis]
+                await asyncio.gather(*tasks)
+        except:
+            pass
+
+    async def delete_sticker(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                tasks = [self.delete_sticker_task(sticker) for sticker in G.stickers]
+                await asyncio.gather(*tasks)
+        except:
+            pass
+
+    async def ban_member(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                tasks = [self.ban_member_task(member) for member in G.members]
+                await asyncio.gather(*tasks)
+        except:
+            pass
+
+    async def kick_member(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                tasks = [self.kick_member_task(member) for member in G.members]
+                await asyncio.gather(*tasks)
+        except:
+            pass
+
+    async def create_category(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            config = helper.LoadConfig()
+            names = config.get("CategoryName", [])
+            if G:
+                tasks = [self.create_category_task(names, G)]
+                await asyncio.gather(*tasks)
+        except:
+            pass
+
+    async def create_channel(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
                 config = helper.LoadConfig()
-                names = config.get("RoleName", [])
-                if G:
-                    tasks = [self.create_role(names, G)]
-                    await asyncio.gather(*tasks)
-            except:
-                pass
+                names = config.get("ChannelName", [])
+                tasks = [self.create_channel_task(names, G)]
+                await asyncio.gather(*tasks)
+        except:
+            pass
 
-        if operation == "CIN":
-            try:
-                Gid = self.Guild
-                G = interaction.client.get_guild(Gid)
-                if G:
-                    config = helper.LoadConfig()
-                    name = config.get("GuildName")
-                    with open("no1jj/icon.png", "rb") as f:
-                        icon = f.read()
-                    await G.edit(name=name, icon=icon)
-            except Exception as e:
-                print(f"Error editing guild: {e}")
+    async def create_role(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            config = helper.LoadConfig()
+            names = config.get("RoleName", [])
+            if G:
+                tasks = [self.create_role_task(names, G)]
+                await asyncio.gather(*tasks)
+        except:
+            pass
 
-    async def delete_channel(self, channel):
+    async def change_icon_and_name(self, interaction):
+        try:
+            Gid = self.Guild
+            G = interaction.client.get_guild(Gid)
+            if G:
+                config = helper.LoadConfig()
+                name = config.get("GuildName")
+                with open("no1jj/icon.png", "rb") as f:
+                    icon = f.read()
+                await G.edit(name=name, icon=icon)
+        except:
+            pass
+
+    async def delete_channel_task(self, channel):
         try:
             while self.running:
                 if channel:
@@ -325,7 +342,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def send_message_to_channel(self, channel, messages):
+    async def send_message_to_channel_task(self, channel, messages):
         try:
             while self.running:
                 config = helper.LoadConfig()
@@ -339,7 +356,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def delete_role(self, role):
+    async def delete_role_task(self, role):
         try:
             while self.running:
                 if role:
@@ -349,7 +366,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def delete_emoji(self, emoji):
+    async def delete_emoji_task(self, emoji):
         try:
             while self.running:
                 if emoji:
@@ -359,7 +376,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def delete_sticker(self, sticker):
+    async def delete_sticker_task(self, sticker):
         try:
             while self.running:
                 if sticker:
@@ -369,7 +386,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def ban_member(self, member):
+    async def ban_member_task(self, member):
         try:
             while self.running:
                 if member:
@@ -379,7 +396,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def kick_member(self, member):
+    async def kick_member_task(self, member):
         try:
             while self.running:
                 if member:
@@ -389,21 +406,21 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def create_category(self, names, guild):
+    async def create_category_task(self, names, guild):
         try:
             while self.running:
                 await guild.create_category(name=helper.RandomChannelName(names))
         except:
             pass
 
-    async def create_channel(self, names, guild):
+    async def create_channel_task(self, names, guild):
         try:
             while self.running:
                 await guild.create_text_channel(name=helper.RandomChannelName(names))
         except:
             pass
 
-    async def create_role(self, names, guild):
+    async def create_role_task(self, names, guild):
         try:
             while self.running:
                 await guild.create_role(name=helper.RandomRoleName(names))
