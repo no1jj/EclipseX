@@ -45,4 +45,5 @@ def RandomChannelName(name):
 def RandomRoleName(name):
     return random.choice(name)
 
-#Made by no.1_jj
+# Made by no.1_jj
+# v1.0.0
