@@ -3,6 +3,7 @@ from discord import Interaction, SyncWebhook
 from discord.ui import View, Select, Button
 import asyncio
 from . import *
+import datetime
 
 ##########SelectGuild##########
 
@@ -123,6 +124,7 @@ class OperationSelect(Select):
         LogWebhook = helper.LoadConfig().get("LogWebhook", "")
 
         stop_button = Button(style=discord.ButtonStyle.danger, label="Stop", custom_id="stop")
+        self.start_time = datetime.datetime.now()
         
         async def stop_callback(interaction):
             if not helper.IsUserInAdmin(userid=str(interaction.user.id)):
@@ -132,6 +134,10 @@ class OperationSelect(Select):
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
+            
+            end_time = datetime.datetime.now()
+            operation_duration = end_time - self.start_time
+            duration_str = str(operation_duration).split('.')[0] 
             
             if SendLogs == False:
                 pass
@@ -143,7 +149,7 @@ class OperationSelect(Select):
                         if guild:
                             embed = discord.Embed(
                                 title="Operation Stopped",
-                                description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operation_labels[operation]}`",
+                                description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operation_labels[operation]}`\n- **Duration**: `{duration_str}`",
                                 color=discord.Color.red()
                             )
                             try:
@@ -155,7 +161,7 @@ class OperationSelect(Select):
             
             self.running = False
             embed = discord.Embed(
-                description="- **Stopping the operation**",
+                description=f"- **Stopping the operation**\n- **Duration**: `{duration_str}`",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
