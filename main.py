@@ -13,31 +13,31 @@ from PyQt5.QtGui import QIcon
 CONFIG_FILE = "no1jj/config.json"
 
 class ProcessOutputReader(QObject):
-    output_received = pyqtSignal(str)
-    process_finished = pyqtSignal(int)
+    outputReceived = pyqtSignal(str)
+    processFinished = pyqtSignal(int)
     
     def __init__(self, process):
         super().__init__()
         self.process = process
         
-    def start_reading(self):
-        threading.Thread(target=self._read_output, daemon=True).start()
+    def startReading(self):
+        threading.Thread(target=self._readOutput, daemon=True).start()
         
-    def _read_output(self):
+    def _readOutput(self):
         try:
             for line in iter(self.process.stdout.readline, ''):
                 if line:
-                    self.output_received.emit(line.strip())
+                    self.outputReceived.emit(line.strip())
                 else:
                     break
             
             self.process.wait()
-            self.process_finished.emit(self.process.returncode)
+            self.processFinished.emit(self.process.returncode)
         except Exception as e:
-            self.output_received.emit(f"❌ Error reading output: {str(e)}")
-            self.process_finished.emit(-1)
+            self.outputReceived.emit(f"❌ Error reading output: {str(e)}")
+            self.processFinished.emit(-1)
 
-def load_config_sync():
+def LoadConfigSync():
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -59,7 +59,7 @@ def load_config_sync():
     except Exception as e:
         return {}
 
-def save_config_sync(config):
+def SaveConfigSync(config):
     try:
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
@@ -71,15 +71,15 @@ def save_config_sync(config):
 class No1jj(QWidget):
     def __init__(self):
         super().__init__()
-        self.config = load_config_sync()
-        self.real_token = self.config.get("BotToken", "")
-        self.real_webhook = self.config.get("LogWebhook", "")
-        self.bot_process = None
-        self.process_reader = None
+        self.config = LoadConfigSync()
+        self.realToken = self.config.get("BotToken", "")
+        self.realWebhook = self.config.get("LogWebhook", "")
+        self.botProcess = None
+        self.processReader = None
         self.guilds = []
-        self.initUI()
+        self.InitUI()
 
-    def initUI(self):
+    def InitUI(self):
         self.setWindowTitle("EclipseX")
         self.setWindowIcon(QIcon("no1jj/icon.png"))
         self.setGeometry(100, 100, 1200, 700)
@@ -140,59 +140,59 @@ class No1jj(QWidget):
         }
     """)
 
-        main_layout = QVBoxLayout()
+        mainLayout = QVBoxLayout()
         
-        top_layout = QVBoxLayout()
+        topLayout = QVBoxLayout()
         
-        config_group = QGroupBox("Bot Settings")
-        config_layout = QVBoxLayout()
+        configGroup = QGroupBox("Bot Settings")
+        configLayout = QVBoxLayout()
 
-        token_layout = QHBoxLayout()
-        token_label = QLabel("Bot Token:")
-        token_label.setStyleSheet("color: #dcddde;")
-        token_label.setFixedWidth(80)
-        token_layout.addWidget(token_label)
+        tokenLayout = QHBoxLayout()
+        tokenLabel = QLabel("Bot Token:")
+        tokenLabel.setStyleSheet("color: #dcddde;")
+        tokenLabel.setFixedWidth(80)
+        tokenLayout.addWidget(tokenLabel)
         
-        self.bot_token = QLineEdit(self)
-        self.bot_token.setText(self.real_token)
-        self.bot_token.setEchoMode(QLineEdit.Password)
-        self.bot_token.textChanged.connect(self.update_real_token)
-        self.bot_token.setStyleSheet("""
+        self.botToken = QLineEdit(self)
+        self.botToken.setText(self.realToken)
+        self.botToken.setEchoMode(QLineEdit.Password)
+        self.botToken.textChanged.connect(self.UpdateRealToken)
+        self.botToken.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
                 background-color: #40444b;
             }
         """)
-        token_layout.addWidget(self.bot_token)
+        tokenLayout.addWidget(self.botToken)
         
-        self.show_token_btn = QPushButton("Show")
-        self.show_token_btn.clicked.connect(self.toggle_token_visibility)
-        self.show_token_btn.setFixedWidth(80)
-        token_layout.addWidget(self.show_token_btn)
-        config_layout.addLayout(token_layout)
+        self.showTokenBtn = QPushButton("Show")
+        self.showTokenBtn.clicked.connect(self.ToggleTokenVisibility)
+        self.showTokenBtn.setFixedWidth(80)
+        tokenLayout.addWidget(self.showTokenBtn)
+        configLayout.addLayout(tokenLayout)
 
-        activity_layout = QHBoxLayout()
-        activity_label = QLabel("Bot Activity:")
-        activity_label.setStyleSheet("color: #dcddde;")
-        activity_label.setFixedWidth(80)
-        activity_layout.addWidget(activity_label)
+        activityLayout = QHBoxLayout()
+        activityLabel = QLabel("Bot Activity:")
+        activityLabel.setStyleSheet("color: #dcddde;")
+        activityLabel.setFixedWidth(80)
+        activityLayout.addWidget(activityLabel)
         
-        self.bot_activity = QLineEdit(self)
-        self.bot_activity.setText(self.config.get("BotActivity", ""))
-        self.bot_activity.setStyleSheet("""
+        self.botActivity = QLineEdit(self)
+        self.botActivity.setText(self.config.get("BotActivity", ""))
+        self.botActivity.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
                 background-color: #40444b;
             }
         """)
-        activity_layout.addWidget(self.bot_activity)
+        activityLayout.addWidget(self.botActivity)
         
-        self.send_everyone_check = QPushButton("@everyone")
-        self.send_everyone_check.setCheckable(True)
-        self.send_everyone_check.setChecked(self.config.get("SendEveryone", True))
-        self.send_everyone_check.setStyleSheet("""
+        self.sendEveryoneCheck = QPushButton("@everyone")
+        self.sendEveryoneCheck.setCheckable(True)
+        self.sendEveryoneCheck.setChecked(self.config.get("SendEveryone", True))
+        self.sendEveryoneCheck.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
@@ -201,31 +201,31 @@ class No1jj(QWidget):
             QPushButton:checked { background-color: #3ba55c; }
             QPushButton:!checked { background-color: #72767d; }
         """)
-        self.send_everyone_check.setFixedWidth(120)
-        activity_layout.addWidget(self.send_everyone_check)
-        config_layout.addLayout(activity_layout)
+        self.sendEveryoneCheck.setFixedWidth(120)
+        activityLayout.addWidget(self.sendEveryoneCheck)
+        configLayout.addLayout(activityLayout)
 
-        userid_layout = QHBoxLayout()
-        userid_label = QLabel("User ID:")
-        userid_label.setStyleSheet("color: #dcddde;")
-        userid_label.setFixedWidth(80)
-        userid_layout.addWidget(userid_label)
+        userIdLayout = QHBoxLayout()
+        userIdLabel = QLabel("User ID:")
+        userIdLabel.setStyleSheet("color: #dcddde;")
+        userIdLabel.setFixedWidth(80)
+        userIdLayout.addWidget(userIdLabel)
         
-        self.user_id = QLineEdit(self)
-        self.user_id.setText(self.config.get("UserId", ""))
-        self.user_id.setStyleSheet("""
+        self.userId = QLineEdit(self)
+        self.userId.setText(self.config.get("UserId", ""))
+        self.userId.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
                 background-color: #40444b;
             }
         """)
-        userid_layout.addWidget(self.user_id)
+        userIdLayout.addWidget(self.userId)
         
-        self.send_logs_check = QPushButton("Send Logs")
-        self.send_logs_check.setCheckable(True)
-        self.send_logs_check.setChecked(self.config.get("SendLogs", False))
-        self.send_logs_check.setStyleSheet("""
+        self.sendLogsCheck = QPushButton("Send Logs")
+        self.sendLogsCheck.setCheckable(True)
+        self.sendLogsCheck.setChecked(self.config.get("SendLogs", False))
+        self.sendLogsCheck.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
@@ -234,309 +234,309 @@ class No1jj(QWidget):
             QPushButton:checked { background-color: #3ba55c; }
             QPushButton:!checked { background-color: #72767d; }
         """)
-        self.send_logs_check.clicked.connect(self.toggle_webhook_visibility)
-        self.send_logs_check.setFixedWidth(120)
-        userid_layout.addWidget(self.send_logs_check)
-        config_layout.addLayout(userid_layout)
+        self.sendLogsCheck.clicked.connect(self.ToggleWebhookVisibility)
+        self.sendLogsCheck.setFixedWidth(120)
+        userIdLayout.addWidget(self.sendLogsCheck)
+        configLayout.addLayout(userIdLayout)
 
-        self.webhook_group = QGroupBox()
-        self.webhook_group.setStyleSheet("""
+        self.webhookGroup = QGroupBox()
+        self.webhookGroup.setStyleSheet("""
             QGroupBox {
                 border: none;
                 margin-top: 0px;
             }
         """)
-        webhook_layout = QHBoxLayout()
-        webhook_label = QLabel("Log Webhook:")
-        webhook_label.setStyleSheet("color: #dcddde;")
-        webhook_label.setFixedWidth(80)
-        webhook_layout.addWidget(webhook_label)
+        webhookLayout = QHBoxLayout()
+        webhookLabel = QLabel("Log Webhook:")
+        webhookLabel.setStyleSheet("color: #dcddde;")
+        webhookLabel.setFixedWidth(80)
+        webhookLayout.addWidget(webhookLabel)
         
-        self.log_webhook = QLineEdit(self)
-        self.log_webhook.setText(self.real_webhook)
-        self.log_webhook.setEchoMode(QLineEdit.Password)
-        self.log_webhook.textChanged.connect(self.update_real_webhook)
-        self.log_webhook.setStyleSheet("""
+        self.logWebhook = QLineEdit(self)
+        self.logWebhook.setText(self.realWebhook)
+        self.logWebhook.setEchoMode(QLineEdit.Password)
+        self.logWebhook.textChanged.connect(self.UpdateRealWebhook)
+        self.logWebhook.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
                 background-color: #40444b;
             }
         """)
-        webhook_layout.addWidget(self.log_webhook)
+        webhookLayout.addWidget(self.logWebhook)
 
-        self.show_webhook_btn = QPushButton("Show")
-        self.show_webhook_btn.clicked.connect(self.toggle_webhook_visibility_content)
-        self.show_webhook_btn.setFixedWidth(80)
-        webhook_layout.addWidget(self.show_webhook_btn)
-        self.webhook_group.setLayout(webhook_layout)
-        config_layout.addWidget(self.webhook_group)
-        self.webhook_group.setVisible(self.config.get("SendLogs", False))
+        self.showWebhookBtn = QPushButton("Show")
+        self.showWebhookBtn.clicked.connect(self.ToggleWebhookVisibilityContent)
+        self.showWebhookBtn.setFixedWidth(80)
+        webhookLayout.addWidget(self.showWebhookBtn)
+        self.webhookGroup.setLayout(webhookLayout)
+        configLayout.addWidget(self.webhookGroup)
+        self.webhookGroup.setVisible(self.config.get("SendLogs", False))
 
-        guild_layout = QHBoxLayout()
-        guild_label = QLabel("Guild Name:")
-        guild_label.setStyleSheet("color: #dcddde;")
-        guild_label.setFixedWidth(80)
-        guild_layout.addWidget(guild_label)
+        guildLayout = QHBoxLayout()
+        guildLabel = QLabel("Guild Name:")
+        guildLabel.setStyleSheet("color: #dcddde;")
+        guildLabel.setFixedWidth(80)
+        guildLayout.addWidget(guildLabel)
         
-        self.guild_name = QLineEdit(self)
-        self.guild_name.setText(self.config.get("GuildName", "No1JJ"))
-        self.guild_name.setStyleSheet("""
+        self.guildName = QLineEdit(self)
+        self.guildName.setText(self.config.get("GuildName", "No1JJ"))
+        self.guildName.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
                 background-color: #40444b;
             }
         """)
-        guild_layout.addWidget(self.guild_name)
-        config_layout.addLayout(guild_layout)
+        guildLayout.addWidget(self.guildName)
+        configLayout.addLayout(guildLayout)
 
-        config_group.setLayout(config_layout)
-        top_layout.addWidget(config_group)
+        configGroup.setLayout(configLayout)
+        topLayout.addWidget(configGroup)
 
-        lists_layout = QHBoxLayout()
+        listsLayout = QHBoxLayout()
 
-        msg_group = QGroupBox("Messages")
-        msg_layout = QVBoxLayout()
+        msgGroup = QGroupBox("Messages")
+        msgLayout = QVBoxLayout()
 
-        self.message_list = QListWidget()
-        self.message_list.addItems(self.config.get("Messages", []))
-        self.message_list.setFixedHeight(120)
-        msg_layout.addWidget(self.message_list)
+        self.messageList = QListWidget()
+        self.messageList.addItems(self.config.get("Messages", []))
+        self.messageList.setFixedHeight(120)
+        msgLayout.addWidget(self.messageList)
 
-        msg_input_layout = QHBoxLayout()
-        self.msg_input = QLineEdit(self)
-        self.msg_input.setPlaceholderText("Enter message")
-        self.msg_input.setStyleSheet("""
+        msgInputLayout = QHBoxLayout()
+        self.msgInput = QLineEdit(self)
+        self.msgInput.setPlaceholderText("Enter message")
+        self.msgInput.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
             }
         """)
-        msg_input_layout.addWidget(self.msg_input)
+        msgInputLayout.addWidget(self.msgInput)
 
-        self.add_msg_btn = QPushButton("Add")
-        self.add_msg_btn.clicked.connect(self.add_message)
-        self.add_msg_btn.setStyleSheet("""
+        self.addMsgBtn = QPushButton("Add")
+        self.addMsgBtn.clicked.connect(self.AddMessage)
+        self.addMsgBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.add_msg_btn.setFixedWidth(120)
-        msg_input_layout.addWidget(self.add_msg_btn)
+        self.addMsgBtn.setFixedWidth(120)
+        msgInputLayout.addWidget(self.addMsgBtn)
 
-        msg_layout.addLayout(msg_input_layout)
+        msgLayout.addLayout(msgInputLayout)
 
-        self.del_msg_btn = QPushButton("Delete Selected")
-        self.del_msg_btn.clicked.connect(self.delete_message)
-        self.del_msg_btn.setStyleSheet("""
+        self.delMsgBtn = QPushButton("Delete Selected")
+        self.delMsgBtn.clicked.connect(self.DeleteMessage)
+        self.delMsgBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.del_msg_btn.setFixedWidth(120)
-        msg_layout.addWidget(self.del_msg_btn)
+        self.delMsgBtn.setFixedWidth(120)
+        msgLayout.addWidget(self.delMsgBtn)
 
-        msg_group.setLayout(msg_layout)
-        lists_layout.addWidget(msg_group)
+        msgGroup.setLayout(msgLayout)
+        listsLayout.addWidget(msgGroup)
 
-        channel_group = QGroupBox("Channel Names")
-        channel_layout = QVBoxLayout()
+        channelGroup = QGroupBox("Channel Names")
+        channelLayout = QVBoxLayout()
 
-        self.channel_list = QListWidget()
-        self.channel_list.addItems(self.config.get("ChannelName", []))
-        self.channel_list.setFixedHeight(120)
-        channel_layout.addWidget(self.channel_list)
+        self.channelList = QListWidget()
+        self.channelList.addItems(self.config.get("ChannelName", []))
+        self.channelList.setFixedHeight(120)
+        channelLayout.addWidget(self.channelList)
 
-        channel_input_layout = QHBoxLayout()
-        self.channel_input = QLineEdit(self)
-        self.channel_input.setPlaceholderText("Enter channel name")
-        self.channel_input.setStyleSheet("""
+        channelInputLayout = QHBoxLayout()
+        self.channelInput = QLineEdit(self)
+        self.channelInput.setPlaceholderText("Enter channel name")
+        self.channelInput.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
             }
         """)
-        channel_input_layout.addWidget(self.channel_input)
+        channelInputLayout.addWidget(self.channelInput)
 
-        self.add_channel_btn = QPushButton("Add")
-        self.add_channel_btn.clicked.connect(self.add_channel)
-        self.add_channel_btn.setStyleSheet("""
+        self.addChannelBtn = QPushButton("Add")
+        self.addChannelBtn.clicked.connect(self.AddChannel)
+        self.addChannelBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.add_channel_btn.setFixedWidth(120)
-        channel_input_layout.addWidget(self.add_channel_btn)
+        self.addChannelBtn.setFixedWidth(120)
+        channelInputLayout.addWidget(self.addChannelBtn)
 
-        channel_layout.addLayout(channel_input_layout)
+        channelLayout.addLayout(channelInputLayout)
 
-        self.del_channel_btn = QPushButton("Delete Selected")
-        self.del_channel_btn.clicked.connect(self.delete_channel)
-        self.del_channel_btn.setStyleSheet("""
+        self.delChannelBtn = QPushButton("Delete Selected")
+        self.delChannelBtn.clicked.connect(self.DeleteChannel)
+        self.delChannelBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.del_channel_btn.setFixedWidth(120)
-        channel_layout.addWidget(self.del_channel_btn)
+        self.delChannelBtn.setFixedWidth(120)
+        channelLayout.addWidget(self.delChannelBtn)
 
-        channel_group.setLayout(channel_layout)
-        lists_layout.addWidget(channel_group)
+        channelGroup.setLayout(channelLayout)
+        listsLayout.addWidget(channelGroup)
 
-        category_group = QGroupBox("Category Names")
-        category_layout = QVBoxLayout()
+        categoryGroup = QGroupBox("Category Names")
+        categoryLayout = QVBoxLayout()
 
-        self.category_list = QListWidget()
-        self.category_list.addItems(self.config.get("CategoryName", []))
-        self.category_list.setFixedHeight(120)
-        category_layout.addWidget(self.category_list)
+        self.categoryList = QListWidget()
+        self.categoryList.addItems(self.config.get("CategoryName", []))
+        self.categoryList.setFixedHeight(120)
+        categoryLayout.addWidget(self.categoryList)
 
-        category_input_layout = QHBoxLayout()
-        self.category_input = QLineEdit(self)
-        self.category_input.setPlaceholderText("Enter category name")
-        self.category_input.setStyleSheet("""
+        categoryInputLayout = QHBoxLayout()
+        self.categoryInput = QLineEdit(self)
+        self.categoryInput.setPlaceholderText("Enter category name")
+        self.categoryInput.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
             }
         """)
-        category_input_layout.addWidget(self.category_input)
+        categoryInputLayout.addWidget(self.categoryInput)
 
-        self.add_category_btn = QPushButton("Add")
-        self.add_category_btn.clicked.connect(self.add_category)
-        self.add_category_btn.setStyleSheet("""
+        self.addCategoryBtn = QPushButton("Add")
+        self.addCategoryBtn.clicked.connect(self.AddCategory)
+        self.addCategoryBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.add_category_btn.setFixedWidth(120)
-        category_input_layout.addWidget(self.add_category_btn)
+        self.addCategoryBtn.setFixedWidth(120)
+        categoryInputLayout.addWidget(self.addCategoryBtn)
 
-        category_layout.addLayout(category_input_layout)
+        categoryLayout.addLayout(categoryInputLayout)
 
-        self.del_category_btn = QPushButton("Delete Selected")
-        self.del_category_btn.clicked.connect(self.delete_category)
-        self.del_category_btn.setStyleSheet("""
+        self.delCategoryBtn = QPushButton("Delete Selected")
+        self.delCategoryBtn.clicked.connect(self.DeleteCategory)
+        self.delCategoryBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.del_category_btn.setFixedWidth(120)
-        category_layout.addWidget(self.del_category_btn)
+        self.delCategoryBtn.setFixedWidth(120)
+        categoryLayout.addWidget(self.delCategoryBtn)
 
-        category_group.setLayout(category_layout)
-        lists_layout.addWidget(category_group)
+        categoryGroup.setLayout(categoryLayout)
+        listsLayout.addWidget(categoryGroup)
 
-        role_group = QGroupBox("Role Names")
-        role_layout = QVBoxLayout()
+        roleGroup = QGroupBox("Role Names")
+        roleLayout = QVBoxLayout()
 
-        self.role_list = QListWidget()
-        self.role_list.addItems(self.config.get("RoleName", []))
-        self.role_list.setFixedHeight(120)
-        role_layout.addWidget(self.role_list)
+        self.roleList = QListWidget()
+        self.roleList.addItems(self.config.get("RoleName", []))
+        self.roleList.setFixedHeight(120)
+        roleLayout.addWidget(self.roleList)
 
-        role_input_layout = QHBoxLayout()
-        self.role_input = QLineEdit(self)
-        self.role_input.setPlaceholderText("Enter role name")
-        self.role_input.setStyleSheet("""
+        roleInputLayout = QHBoxLayout()
+        self.roleInput = QLineEdit(self)
+        self.roleInput.setPlaceholderText("Enter role name")
+        self.roleInput.setStyleSheet("""
             QLineEdit {
                 padding: 8px;
                 font-size: 14px;
             }
         """)
-        role_input_layout.addWidget(self.role_input)
+        roleInputLayout.addWidget(self.roleInput)
 
-        self.add_role_btn = QPushButton("Add")
-        self.add_role_btn.clicked.connect(self.add_role)
-        self.add_role_btn.setStyleSheet("""
+        self.addRoleBtn = QPushButton("Add")
+        self.addRoleBtn.clicked.connect(self.AddRole)
+        self.addRoleBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.add_role_btn.setFixedWidth(120)
-        role_input_layout.addWidget(self.add_role_btn)
+        self.addRoleBtn.setFixedWidth(120)
+        roleInputLayout.addWidget(self.addRoleBtn)
 
-        role_layout.addLayout(role_input_layout)
+        roleLayout.addLayout(roleInputLayout)
 
-        self.del_role_btn = QPushButton("Delete Selected")
-        self.del_role_btn.clicked.connect(self.delete_role)
-        self.del_role_btn.setStyleSheet("""
+        self.delRoleBtn = QPushButton("Delete Selected")
+        self.delRoleBtn.clicked.connect(self.DeleteRole)
+        self.delRoleBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.del_role_btn.setFixedWidth(120)
-        role_layout.addWidget(self.del_role_btn)
+        self.delRoleBtn.setFixedWidth(120)
+        roleLayout.addWidget(self.delRoleBtn)
 
-        role_group.setLayout(role_layout)
-        lists_layout.addWidget(role_group)
+        roleGroup.setLayout(roleLayout)
+        listsLayout.addWidget(roleGroup)
 
-        top_layout.addLayout(lists_layout)
+        topLayout.addLayout(listsLayout)
         
-        main_layout.addLayout(top_layout)
+        mainLayout.addLayout(topLayout)
         
-        bottom_layout = QHBoxLayout()
+        bottomLayout = QHBoxLayout()
         
-        button_group = QGroupBox("Controls")
-        button_layout = QVBoxLayout()  
+        buttonGroup = QGroupBox("Controls")
+        buttonLayout = QVBoxLayout()  
 
-        self.save_btn = QPushButton("Save Config")
-        self.save_btn.clicked.connect(self.save_config)
-        self.save_btn.setStyleSheet("""
+        self.saveBtn = QPushButton("Save Config")
+        self.saveBtn.clicked.connect(self.SaveConfig)
+        self.saveBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.save_btn.setFixedWidth(120)
-        button_layout.addWidget(self.save_btn)
+        self.saveBtn.setFixedWidth(120)
+        buttonLayout.addWidget(self.saveBtn)
 
-        self.run_bot_btn = QPushButton("Run bot.py")
-        self.run_bot_btn.clicked.connect(self.run_bot)
-        self.run_bot_btn.setStyleSheet("""
+        self.runBotBtn = QPushButton("Run bot.py")
+        self.runBotBtn.clicked.connect(self.RunBot)
+        self.runBotBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.run_bot_btn.setFixedWidth(120)
-        button_layout.addWidget(self.run_bot_btn)
+        self.runBotBtn.setFixedWidth(120)
+        buttonLayout.addWidget(self.runBotBtn)
 
-        self.stop_bot_btn = QPushButton("Stop Bot")
-        self.stop_bot_btn.clicked.connect(self.stop_bot)
-        self.stop_bot_btn.setStyleSheet("""
+        self.stopBotBtn = QPushButton("Stop Bot")
+        self.stopBotBtn.clicked.connect(self.StopBot)
+        self.stopBotBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
                 min-width: 100px;
             }
         """)
-        self.stop_bot_btn.setFixedWidth(120)
-        self.stop_bot_btn.setEnabled(False)
-        button_layout.addWidget(self.stop_bot_btn)
+        self.stopBotBtn.setFixedWidth(120)
+        self.stopBotBtn.setEnabled(False)
+        buttonLayout.addWidget(self.stopBotBtn)
 
-        self.close_gui_btn = QPushButton("Close GUI")
-        self.close_gui_btn.clicked.connect(self.close)
-        self.close_gui_btn.setStyleSheet("""
+        self.closeGuiBtn = QPushButton("Close GUI")
+        self.closeGuiBtn.clicked.connect(self.close)
+        self.closeGuiBtn.setStyleSheet("""
             QPushButton {
                 padding: 8px;
                 font-size: 14px;
@@ -544,125 +544,125 @@ class No1jj(QWidget):
                 background-color: #ed4245;
             }
         """)
-        self.close_gui_btn.setFixedWidth(120)
-        button_layout.addWidget(self.close_gui_btn)
+        self.closeGuiBtn.setFixedWidth(120)
+        buttonLayout.addWidget(self.closeGuiBtn)
 
-        button_group.setLayout(button_layout)
-        bottom_layout.addWidget(button_group)
+        buttonGroup.setLayout(buttonLayout)
+        bottomLayout.addWidget(buttonGroup)
 
-        term_group = QGroupBox("Terminal Output")
-        term_layout = QVBoxLayout()
-        self.terminal_output = QTextEdit()
-        self.terminal_output.setReadOnly(True)
-        self.terminal_output.setStyleSheet("background-color: black; color: lime; font-family: monospace;")
-        self.terminal_output.setFixedHeight(200)
-        term_layout.addWidget(self.terminal_output)
-        term_group.setLayout(term_layout)
-        bottom_layout.addWidget(term_group, stretch=2)  
+        termGroup = QGroupBox("Terminal Output")
+        termLayout = QVBoxLayout()
+        self.terminalOutput = QTextEdit()
+        self.terminalOutput.setReadOnly(True)
+        self.terminalOutput.setStyleSheet("background-color: black; color: lime; font-family: monospace;")
+        self.terminalOutput.setFixedHeight(200)
+        termLayout.addWidget(self.terminalOutput)
+        termGroup.setLayout(termLayout)
+        bottomLayout.addWidget(termGroup, stretch=2)  
         
-        main_layout.addLayout(bottom_layout)
+        mainLayout.addLayout(bottomLayout)
 
-        self.setLayout(main_layout)
+        self.setLayout(mainLayout)
 
-    def update_real_token(self, text):
-        self.real_token = text
+    def UpdateRealToken(self, text):
+        self.realToken = text
     
-    def toggle_token_visibility(self):
-        if self.bot_token.echoMode() == QLineEdit.Password:
-            self.bot_token.setEchoMode(QLineEdit.Normal)
-            self.show_token_btn.setText("Hide")
+    def ToggleTokenVisibility(self):
+        if self.botToken.echoMode() == QLineEdit.Password:
+            self.botToken.setEchoMode(QLineEdit.Normal)
+            self.showTokenBtn.setText("Hide")
         else:
-            self.bot_token.setEchoMode(QLineEdit.Password)
-            self.show_token_btn.setText("Show")
+            self.botToken.setEchoMode(QLineEdit.Password)
+            self.showTokenBtn.setText("Show")
     
-    def add_message(self):
-        msg = self.msg_input.text().strip()
+    def AddMessage(self):
+        msg = self.msgInput.text().strip()
         if msg:
-            self.message_list.addItem(msg)
-            self.msg_input.clear()
+            self.messageList.addItem(msg)
+            self.msgInput.clear()
     
-    def delete_message(self):
-        selected_item = self.message_list.currentRow()
-        if selected_item >= 0:
-            self.message_list.takeItem(selected_item)
+    def DeleteMessage(self):
+        selectedItem = self.messageList.currentRow()
+        if selectedItem >= 0:
+            self.messageList.takeItem(selectedItem)
         else:
             QMessageBox.warning(self, "Warning", "No message selected to delete.")
     
-    def add_channel(self):
-        name = self.channel_input.text().strip()
+    def AddChannel(self):
+        name = self.channelInput.text().strip()
         if name:
-            self.channel_list.addItem(name)
-            self.channel_input.clear()
+            self.channelList.addItem(name)
+            self.channelInput.clear()
     
-    def delete_channel(self):
-        selected_item = self.channel_list.currentRow()
-        if selected_item >= 0:
-            self.channel_list.takeItem(selected_item)
+    def DeleteChannel(self):
+        selectedItem = self.channelList.currentRow()
+        if selectedItem >= 0:
+            self.channelList.takeItem(selectedItem)
         else:
             QMessageBox.warning(self, "Warning", "No channel name selected to delete.")
 
-    def add_category(self):
-        name = self.category_input.text().strip()
+    def AddCategory(self):
+        name = self.categoryInput.text().strip()
         if name:
-            self.category_list.addItem(name)
-            self.category_input.clear()
+            self.categoryList.addItem(name)
+            self.categoryInput.clear()
     
-    def delete_category(self):
-        selected_item = self.category_list.currentRow()
-        if selected_item >= 0:
-            self.category_list.takeItem(selected_item)
+    def DeleteCategory(self):
+        selectedItem = self.categoryList.currentRow()
+        if selectedItem >= 0:
+            self.categoryList.takeItem(selectedItem)
         else:
             QMessageBox.warning(self, "Warning", "No category name selected to delete.")
 
-    def add_role(self):
-        name = self.role_input.text().strip()
+    def AddRole(self):
+        name = self.roleInput.text().strip()
         if name:
-            self.role_list.addItem(name)
-            self.role_input.clear()
+            self.roleList.addItem(name)
+            self.roleInput.clear()
     
-    def delete_role(self):
-        selected_item = self.role_list.currentRow()
-        if selected_item >= 0:
-            self.role_list.takeItem(selected_item)
+    def DeleteRole(self):
+        selectedItem = self.roleList.currentRow()
+        if selectedItem >= 0:
+            self.roleList.takeItem(selectedItem)
         else:
             QMessageBox.warning(self, "Warning", "No role name selected to delete.")
     
-    def save_config(self):
-        self.config["BotToken"] = self.real_token
-        self.config["BotActivity"] = self.bot_activity.text()
-        self.config["UserId"] = self.user_id.text()
-        self.config["GuildName"] = self.guild_name.text()
-        self.config["Messages"] = [self.message_list.item(i).text() for i in range(self.message_list.count())]
-        self.config["ChannelName"] = [self.channel_list.item(i).text() for i in range(self.channel_list.count())]
-        self.config["CategoryName"] = [self.category_list.item(i).text() for i in range(self.category_list.count())]
-        self.config["RoleName"] = [self.role_list.item(i).text() for i in range(self.role_list.count())]
-        self.config["SendEveryone"] = self.send_everyone_check.isChecked()
-        self.config["SendLogs"] = self.send_logs_check.isChecked()
-        self.config["LogWebhook"] = self.real_webhook
+    def SaveConfig(self):
+        self.config["BotToken"] = self.realToken
+        self.config["BotActivity"] = self.botActivity.text()
+        self.config["UserId"] = self.userId.text()
+        self.config["GuildName"] = self.guildName.text()
+        self.config["Messages"] = [self.messageList.item(i).text() for i in range(self.messageList.count())]
+        self.config["ChannelName"] = [self.channelList.item(i).text() for i in range(self.channelList.count())]
+        self.config["CategoryName"] = [self.categoryList.item(i).text() for i in range(self.categoryList.count())]
+        self.config["RoleName"] = [self.roleList.item(i).text() for i in range(self.roleList.count())]
+        self.config["SendEveryone"] = self.sendEveryoneCheck.isChecked()
+        self.config["SendLogs"] = self.sendLogsCheck.isChecked()
+        self.config["LogWebhook"] = self.realWebhook
         
-        if save_config_sync(self.config):
-            self.terminal_output.append("✅ Settings have been saved successfully!")
+        if SaveConfigSync(self.config):
+            self.terminalOutput.append("✅ Settings have been saved successfully!")
         else:
-            self.terminal_output.append("❌ An error occurred while saving the settings.")
+            self.terminalOutput.append("❌ An error occurred while saving the settings.")
     
-    def run_bot(self):
-        if self.bot_process is not None and self.bot_process.poll() is None:
+    def RunBot(self):
+        if self.botProcess is not None and self.botProcess.poll() is None:
             QMessageBox.information(self, "Info", "Bot is already running.")
             return
             
         if not os.path.exists("bot.py"):
-            self.terminal_output.append("❌ bot.py file not found!")
+            self.terminalOutput.append("❌ bot.py file not found!")
             QMessageBox.critical(self, "Error", "bot.py file does not exist in the current directory.")
             return
             
         try:
-            self.terminal_output.append("🚀 Attempting to run bot.py...")
+            self.terminalOutput.append("🚀 Attempting to run bot.py...")
 
             if not os.path.exists(CONFIG_FILE):
-                self.terminal_output.append("⚠️ No configuration file found. Please save settings first.")
-                self.save_config()
+                self.terminalOutput.append("⚠️ No configuration file found. Please save settings first.")
+                self.SaveConfig()
             
-            self.bot_process = subprocess.Popen(
+            self.botProcess = subprocess.Popen(
                 ["python", "bot.py"], 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT,
@@ -671,69 +671,69 @@ class No1jj(QWidget):
                 universal_newlines=True
             )
             
-            self.process_reader = ProcessOutputReader(self.bot_process)
-            self.process_reader.output_received.connect(self.append_output)
-            self.process_reader.process_finished.connect(self.handle_process_finished)
-            self.process_reader.start_reading()
+            self.processReader = ProcessOutputReader(self.botProcess)
+            self.processReader.outputReceived.connect(self.AppendOutput)
+            self.processReader.processFinished.connect(self.HandleProcessFinished)
+            self.processReader.startReading()
             
-            self.terminal_output.append("✅ bot.py execution process has started!")
-            self.run_bot_btn.setEnabled(False)
-            self.stop_bot_btn.setEnabled(True)
+            self.terminalOutput.append("✅ bot.py execution process has started!")
+            self.runBotBtn.setEnabled(False)
+            self.stopBotBtn.setEnabled(True)
             
         except Exception as e:
             error_msg = f"❌ Error occurred while running bot.py: {str(e)}"
-            self.terminal_output.append(error_msg)
+            self.terminalOutput.append(error_msg)
             QMessageBox.critical(self, "Error", error_msg)
     
-    def append_output(self, text):
-        self.terminal_output.append(text)
-        self.terminal_output.verticalScrollBar().setValue(
-            self.terminal_output.verticalScrollBar().maximum()
+    def AppendOutput(self, text):
+        self.terminalOutput.append(text)
+        self.terminalOutput.verticalScrollBar().setValue(
+            self.terminalOutput.verticalScrollBar().maximum()
         )
     
-    def handle_process_finished(self, exit_code):
+    def HandleProcessFinished(self, exit_code):
         if exit_code == 0:
-            self.terminal_output.append("✅ bot.py has terminated successfully.")
+            self.terminalOutput.append("✅ bot.py has terminated successfully.")
         else:
-            self.terminal_output.append(f"⚠️ bot.py has stopped (Exit code: {exit_code})")
+            self.terminalOutput.append(f"⚠️ bot.py has stopped (Exit code: {exit_code})")
         
-        self.run_bot_btn.setEnabled(True)
-        self.stop_bot_btn.setEnabled(False)
-        self.bot_process = None
+        self.runBotBtn.setEnabled(True)
+        self.stopBotBtn.setEnabled(False)
+        self.botProcess = None
     
-    def stop_bot(self):
-        if self.bot_process is not None and self.bot_process.poll() is None:
-            self.terminal_output.append("⏹️ Attempting to stop bot...")
+    def StopBot(self):
+        if self.botProcess is not None and self.botProcess.poll() is None:
+            self.terminalOutput.append("⏹️ Attempting to stop bot...")
             try:
-                self.bot_process.terminate()
+                self.botProcess.terminate()
                 
                 def check_and_kill():
-                    if self.bot_process and self.bot_process.poll() is None:
-                        self.terminal_output.append("⚠️ Bot is not responding. Forcibly terminating...")
-                        self.bot_process.kill()
+                    if self.botProcess and self.botProcess.poll() is None:
+                        self.terminalOutput.append("⚠️ Bot is not responding. Forcibly terminating...")
+                        self.botProcess.kill()
                 
                 QTimer.singleShot(5000, check_and_kill)
                 
             except Exception as e:
-                self.terminal_output.append(f"❌ Error occurred while stopping bot: {str(e)}")
+                self.terminalOutput.append(f"❌ Error occurred while stopping bot: {str(e)}")
         else:
-            self.terminal_output.append("ℹ️ No bot is currently running.")
-            self.run_bot_btn.setEnabled(True)
-            self.stop_bot_btn.setEnabled(False)
+            self.terminalOutput.append("ℹ️ No bot is currently running.")
+            self.runBotBtn.setEnabled(True)
+            self.stopBotBtn.setEnabled(False)
 
-    def toggle_webhook_visibility(self):
-        self.webhook_group.setVisible(self.send_logs_check.isChecked())
+    def ToggleWebhookVisibility(self):
+        self.webhookGroup.setVisible(self.sendLogsCheck.isChecked())
 
-    def update_real_webhook(self, text):
-        self.real_webhook = text
+    def UpdateRealWebhook(self, text):
+        self.realWebhook = text
 
-    def toggle_webhook_visibility_content(self):
-        if self.log_webhook.echoMode() == QLineEdit.Password:
-            self.log_webhook.setEchoMode(QLineEdit.Normal)
-            self.show_webhook_btn.setText("Hide")
+    def ToggleWebhookVisibilityContent(self):
+        if self.logWebhook.echoMode() == QLineEdit.Password:
+            self.logWebhook.setEchoMode(QLineEdit.Normal)
+            self.showWebhookBtn.setText("Hide")
         else:
-            self.log_webhook.setEchoMode(QLineEdit.Password)
-            self.show_webhook_btn.setText("Show")
+            self.logWebhook.setEchoMode(QLineEdit.Password)
+            self.showWebhookBtn.setText("Show")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -742,4 +742,4 @@ if __name__ == "__main__":
     sys.exit(app.exec_())
 
 # Made by no.1_jj
-# v1.0.1
+# v1.0.2

