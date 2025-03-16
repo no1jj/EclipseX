@@ -80,7 +80,7 @@ class No1jj(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("no1jj")
+        self.setWindowTitle("EclipseX")
         self.setWindowIcon(QIcon("no1jj/icon.png"))
         self.setGeometry(100, 100, 1200, 700)
     

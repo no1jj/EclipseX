@@ -1,37 +1,37 @@
 {
-    "BotToken": "YourBotToken",
-    "UserId": "YourUserId",
-    "BotActivity": "no1jj",
-    "GuildName": "no1jj",
+    "BotToken": "EclipseXBotToken",
+    "UserId": "EclipseXUserID",
+    "BotActivity": "EclipseX",
+    "GuildName": "EclipseX",
     "ChannelName": [
-        "no1jj",
-        "no2jj",
-        "no3jj",
-        "no4j",
-        "no5jj"
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX"
     ],
     "CategoryName": [
-        "no1jj",
-        "no2jj",
-        "no3jj",
-        "no4j",
-        "no5jj"
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX"
     ],
     "Messages": [
-        "no1jj",
-        "no2jj",
-        "no3jj",
-        "no4j",
-        "no5jj"
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX"
     ],
     "RoleName": [
-        "no1jj",
-        "no2jj",
-        "no3jj",
-        "no4j",
-        "no5jj"
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX",
+        "EclipseX"
     ],
     "SendEveryone": true,
     "SendLogs": true,
-    "LogWebhook": "https://discord.com/api/webhooks/YourWebhookURL"
+    "LogWebhook": "https://discord.com/api/webhooks/EclipseX"
 }
