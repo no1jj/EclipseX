@@ -2,8 +2,9 @@
 
 import discord
 from discord.ext import commands
-from discord import Interaction
+from discord import Interaction, SyncWebhook
 from no1jj import *
+import datetime
 
 ##########CONFIG##########
 
@@ -23,6 +24,31 @@ class Bot(commands.AutoShardedBot):
         botID = self.user.id
         botInvitationLink = f"https://discord.com/oauth2/authorize?client_id={botID}&permissions=8&integration_type=0&scope=bot"
         print(f"Bot Invitation Link: {botInvitationLink}")
+
+    async def on_guild_join(self, guild):
+        sendLogs = helper.LoadConfig().get("SendLogs", False)
+        if sendLogs == False:
+            pass
+        else:
+            try:
+                logWebhook = SyncWebhook.from_url(config.get("LogWebhook", ""))
+                if logWebhook:
+                    guild = self.get_guild(guild.id)
+                    if guild:
+                        embed = discord.Embed(
+                            title="Guild Joined",
+                            description=f"- **Name**: `{guild.name}`\n- **ID**: `{guild.id}`\n- **Owner**: `{guild.owner}`\n- **Members**: `{guild.member_count}`",
+                            color=discord.Color.blue()
+                        )
+                        embed.set_footer(text=f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                        if guild.icon:
+                            embed.set_thumbnail(url=guild.icon.url)
+                        try:
+                            logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
+                        except:
+                            pass
+            except:
+                pass
 
 intents = discord.Intents.all()
 no1jj = Bot(intents=intents, command_prefix="J!", help_command=None)
@@ -49,4 +75,4 @@ async def Start(interaction: Interaction):
 no1jj.run(botToken)
 
 # Made by no.1_jj
-# v1.0.2
+# v1.0.3

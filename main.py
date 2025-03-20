@@ -742,4 +742,4 @@ if __name__ == "__main__":
     sys.exit(app.exec_())
 
 # Made by no.1_jj
-# v1.0.2
+# v1.0.3

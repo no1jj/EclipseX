@@ -63,6 +63,9 @@ class GuildSelect(Select):
                             description=f"- **Name**: `{guild.name}`\n- **ID**: `{guild.id}`",
                             color=discord.Color.blue()
                         )
+                        embed.set_footer(text=f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                        if guild.icon:
+                            embed.set_thumbnail(url=guild.icon.url)
                         try:
                             logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                         except:
@@ -161,6 +164,10 @@ class OperationSelect(Select):
                                 description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operationLabels[operation]}`\n- **Duration**: `{durationStr}`",
                                 color=discord.Color.red()
                             )
+                            if guild.icon:
+                                embed.set_thumbnail(url=guild.icon.url)
+                            embed.set_footer(text=f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                            
                             try:
                                 logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                             except:
@@ -201,6 +208,9 @@ class OperationSelect(Select):
                             description=f"- **Guild**: `{guild.name}`\n- **Guild ID**: `{guild.id}`\n- **Operation**: `{self.operationLabels[operation]}`",
                             color=discord.Color.blue()
                         )
+                        embed.set_footer(text=f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                        if guild.icon:
+                            embed.set_thumbnail(url=guild.icon.url)
                         try:
                             logWebhook.send(embed=embed, username="EclipseX", avatar_url="https://ibb.co/4ZtfJJJ3")
                         except:
@@ -443,4 +453,4 @@ class OperationSelect(Select):
             pass
 
 # Made by no.1_jj
-# v1.0.2
+# v1.0.3
