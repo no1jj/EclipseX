@@ -129,7 +129,7 @@ class OperationSelect(Select):
         stopButton = Button(style=discord.ButtonStyle.danger, label="Stop", custom_id="stop")
         self.startTime = datetime.datetime.now()
         
-        async def stopCallback(interaction):
+        async def stopCallback(interaction: discord.Interaction):
             if not helper.IsUserInAdmin(userid=str(interaction.user.id)):
                 embed = discord.Embed(
                     description="You cannot use this command.",
@@ -180,6 +180,9 @@ class OperationSelect(Select):
                 description=f"- **Stopping the operation**\n- **Duration**: `{durationStr}`",
                 color=discord.Color.red()
             )
+            
+            await interaction.message.delete()
+            
             await interaction.response.send_message(embed=embed, ephemeral=True)
         
         stopButton.callback = stopCallback
@@ -453,4 +456,4 @@ class OperationSelect(Select):
             pass
 
 # Made by no.1_jj
-# v1.0.3
+# v1.0.4
